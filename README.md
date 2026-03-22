@@ -6,40 +6,51 @@ Installs a set of dotfiles from a given Git repository. By default, it will inst
 
 ## Requirements
 
-Requires `git` on the managed machine (you can easily install it with `geerlingguy.git` if required).
+Requires `git` and `community.general` collection on the managed machine.
 
 ## Role Variables
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
-    dotfiles_repo: "https://github.com/geerlingguy/dotfiles.git"
+    dotfiles_repo: "https://github.com/ceso/dotfiles.git"
     dotfiles_repo_version: master
 
-The git repository and branch/tag/commit hash to use for retrieving dotfiles. Dotfiles should generally be laid out within the root directory of the repository.
+The git repository and branch/tag/commit hash to use for retrieving dotfiles.
 
-    dotfiles_repo_accept_hostkey: false
+    dotfiles_repo_accept_hostkey: true
 
-Add the hostkey for the repo url if not already added. If ssh_opts contains "-o StrictHostKeyChecking=no", this parameter is ignored.
+Add the hostkey for the repo url if not already added.
 
-    dotfiles_repo_local_destination: "~/Documents/dotfiles"
+    dotfiles_repo_local_destination: "~/Projects/repos/dotfiles"
 
 The local path where the `dotfiles_repo` will be cloned.
 
     dotfiles_home: "~"
 
-The home directory where dotfiles will be linked. Generally, the default should work, but in some circumstances, or when running the role as sudo on behalf of another user, you may want to specify the full path.
+The home directory where dotfiles will be linked.
 
     dotfiles_files:
-      - .zshrc
-      - .gitignore
-      - .inputrc
-      - .vimrc
+      - .config/bat
+      - .config/eza
+      - .config/fish
+      - .config/ghostty
+      - .config/git
+      - .config/nvim
+      - .config/zellij
+      - .homebrew
+      - .ssh
 
-Which files from the dotfiles repository should be linked to the `dotfiles_home`.
+Entries to symlink into the home directory. Parent directories are created automatically.
+
+    dotfiles_bin_dir: bin
+
+Directory whose contents are individually symlinked to `~/.local/bin/`.
+
+If any dotfiles directory contains a `GNUmakefile`, it is executed before symlinking.
 
 ## Dependencies
 
-None
+- `community.general`
 
 ## Example Playbook
 
