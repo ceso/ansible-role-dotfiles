@@ -1,12 +1,29 @@
 ---
-dotfiles_repo: "https://github.com/geerlingguy/dotfiles.git"
+dotfiles_repo: "https://github.com/ceso/dotfiles.git"
 dotfiles_repo_version: master
-dotfiles_repo_accept_hostkey: false
-dotfiles_repo_local_destination: "~/Documents/dotfiles"
+dotfiles_repo_accept_hostkey: true
 
-dotfiles_home: "~"
+# Expand ~ to the actual home directory
+dotfiles_repo_local_destination: "{{ ansible_env.HOME }}/Projects/repos/dotfiles"
+dotfiles_home: "{{ ansible_env.HOME }}"
+
+# Homebrew prefix, used to add brew binaries to PATH when running GNUmakefiles
+dotfiles_brew_prefix: "/home/linuxbrew/.linuxbrew"
+
+# Entries to symlink into ~/
 dotfiles_files:
-  - .zshrc
-  - .gitignore
-  - .inputrc
-  - .vimrc
+  - .config/bat
+  - .config/Code
+  - .config/eza
+  - .config/fish
+  - .config/ghostty
+  - .config/git
+  - .config/nvim
+  - .config/zellij
+  - .homebrew
+  - .ssh
+
+# Directory whose contents are individually symlinked to ~/.local/bin/
+dotfiles_bin_dir: bin
+
+# eof
