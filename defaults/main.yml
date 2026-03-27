@@ -15,7 +15,6 @@ dotfiles_brew_prefix: "/home/linuxbrew/.linuxbrew"
 # Entries to symlink into ~/
 dotfiles_files:
   - .config/bat
-  - .config/Code
   - .config/eza
   - .config/fish
   - .config/ghostty
