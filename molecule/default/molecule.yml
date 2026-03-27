@@ -1,4 +1,6 @@
 ---
+# roles/ansible-role-dotfiles/molecule/default/molecule.yml
+
 role_name_check: 1
 dependency:
   name: galaxy

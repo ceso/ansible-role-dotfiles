@@ -1,4 +1,6 @@
 ---
+# roles/ansible-role-dotfiles/tasks/main.yml
+
 # ------------------------------------------
 # Clone dotfiles repository
 # ------------------------------------------
@@ -30,7 +32,7 @@
   loop_control:
     label: "{{ item.item }}"
   environment:
-    PATH: "{{ dotfiles_brew_prefix }}/bin:{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
+    PATH: "{{ dotfiles_brew_prefix }}/bin:{{ ansible_facts['user_dir'] }}/.local/bin:{{ ansible_facts['env']['PATH'] }}"
   when: item.stat.exists
   become: false
   ignore_errors: true
@@ -69,7 +71,7 @@
   when:
     - item.stat.exists
     - not item.stat.islnk
-    - item.item != ".ssh"   # Never delete .ssh
+    - item.item != ".ssh"
 
 # ------------------------------------------
 # Symlink dotfiles
@@ -110,5 +112,3 @@
   loop: "{{ dotfiles_bin_files.files | default([]) }}"
   loop_control:
     label: "{{ item.path | basename }}"
-
-# eof
