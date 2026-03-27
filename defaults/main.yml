@@ -1,11 +1,13 @@
 ---
+# roles/ansible-role-dotfiles/defaults/main.yml
+
 dotfiles_repo: "https://github.com/ceso/dotfiles.git"
 dotfiles_repo_version: master
 dotfiles_repo_accept_hostkey: true
 
 # Expand ~ to the actual home directory
-dotfiles_repo_local_destination: "{{ ansible_env.HOME }}/Projects/repos/dotfiles"
-dotfiles_home: "{{ ansible_env.HOME }}"
+dotfiles_repo_local_destination: "{{ ansible_facts['user_dir'] }}/Projects/repos/dotfiles"
+dotfiles_home: "{{ ansible_facts['user_dir'] }}"
 
 # Homebrew prefix, used to add brew binaries to PATH when running GNUmakefiles
 dotfiles_brew_prefix: "/home/linuxbrew/.linuxbrew"
@@ -25,5 +27,3 @@ dotfiles_files:
 
 # Directory whose contents are individually symlinked to ~/.local/bin/
 dotfiles_bin_dir: bin
-
-# eof
