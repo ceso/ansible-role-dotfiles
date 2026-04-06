@@ -1,18 +1,64 @@
 ---
 # roles/ansible-role-dotfiles/defaults/main.yml
 
+# @var dotfiles_repo:type: string
+# @var dotfiles_repo:description: Git URL of the dotfiles repository to clone
+# @var dotfiles_repo:example: >
+# dotfiles_repo: "https://github.com/user/dotfiles.git"
+# @end
 dotfiles_repo: "https://github.com/ceso/dotfiles.git"
+
+# @var dotfiles_repo_version:type: string
+# @var dotfiles_repo_version:description: Branch or tag to check out from the dotfiles repository
+# @var dotfiles_repo_version:example: >
+# dotfiles_repo_version: main
+# @end
 dotfiles_repo_version: master
+
+# @var dotfiles_repo_accept_hostkey:type: bool
+# @var dotfiles_repo_accept_hostkey:description: Whether to accept the SSH host key when cloning
+# @var dotfiles_repo_accept_hostkey:example: >
+# dotfiles_repo_accept_hostkey: false
+# @end
 dotfiles_repo_accept_hostkey: true
 
-# Expand ~ to the actual home directory
+# @var dotfiles_repo_local_destination:type: string
+# @var dotfiles_repo_local_destination:description: Local path where the dotfiles repository is cloned
+# @var dotfiles_repo_local_destination:example: >
+# dotfiles_repo_local_destination: "{{ ansible_facts['user_dir'] }}/dotfiles"
+# @end
 dotfiles_repo_local_destination: "{{ ansible_facts['user_dir'] }}/Projects/repos/dotfiles"
+
+# @var dotfiles_home:type: string
+# @var dotfiles_home:description: Home directory used as the symlink target root
+# @var dotfiles_home:example: >
+# dotfiles_home: "/home/user"
+# @end
 dotfiles_home: "{{ ansible_facts['user_dir'] }}"
 
+# @var dotfiles_brew_prefix:type: string
+# @var dotfiles_brew_prefix:description: >
 # Homebrew prefix, used to add brew binaries to PATH when running GNUmakefiles
+# @end
+# @var dotfiles_brew_prefix:example: >
+# dotfiles_brew_prefix: "/opt/homebrew"
+# @end
 dotfiles_brew_prefix: "/home/linuxbrew/.linuxbrew"
 
-# Entries to symlink into ~/
+# @var dotfiles_files:type: list[string]
+# @var dotfiles_files:description: >
+# Paths in the dotfiles repo to link into the home directory.
+# Each entry's individual files are symlinked recursively, preserving
+# the directory structure. This means existing directories at the target
+# (like ~/.local/bin/ or ~/.ssh/) are never replaced, only populated
+# with symlinks to repo files
+# @end
+# @var dotfiles_files:example: >
+# dotfiles_files:
+#   - .config/fish
+#   - .config/nvim
+#   - .ssh
+# @end
 dotfiles_files:
   - .config/bat
   - .config/eza
@@ -23,6 +69,5 @@ dotfiles_files:
   - .config/zellij
   - .homebrew
   - .ssh
-
-# Directory whose contents are individually symlinked to ~/.local/bin/
-dotfiles_bin_dir: bin
+  - .local/bin
+  - .local/share/ghostty/dockerfiles

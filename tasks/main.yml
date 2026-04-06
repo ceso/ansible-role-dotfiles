@@ -1,9 +1,6 @@
 ---
 # roles/ansible-role-dotfiles/tasks/main.yml
 
-# ------------------------------------------
-# Clone dotfiles repository
-# ------------------------------------------
 - name: Ensure dotfiles repository is cloned locally
   ansible.builtin.git:
     repo: "{{ dotfiles_repo }}"
@@ -13,9 +10,6 @@
     force: true
   become: false
 
-# ------------------------------------------
-# Optional: run GNUmakefiles if present
-# ------------------------------------------
 - name: Check for GNUmakefiles in dotfiles
   ansible.builtin.stat:
     path: "{{ dotfiles_repo_local_destination }}/{{ item }}/GNUmakefile"
@@ -37,22 +31,6 @@
   become: false
   ignore_errors: true
 
-# ------------------------------------------
-# Ensure parent directories exist
-# ------------------------------------------
-- name: Ensure parent directories exist
-  ansible.builtin.file:
-    path: "{{ (dotfiles_home ~ '/' ~ item) | dirname }}"
-    state: directory
-    mode: "0755"
-  loop: "{{ dotfiles_files }}"
-  loop_control:
-    label: "{{ item }}"
-  become: false
-
-# ------------------------------------------
-# Remove existing files if they are not symlinks (SAFE)
-# ------------------------------------------
 - name: Check existing dotfile entries
   ansible.builtin.stat:
     path: "{{ dotfiles_home }}/{{ item }}"
@@ -61,7 +39,7 @@
   loop_control:
     label: "{{ item }}"
 
-- name: Remove existing entries that are not symlinks (do not touch .ssh)
+- name: Remove old directory symlinks
   ansible.builtin.file:
     path: "{{ dotfiles_home }}/{{ item.item }}"
     state: absent
@@ -70,45 +48,37 @@
     label: "{{ item.item }}"
   when:
     - item.stat.exists
-    - not item.stat.islnk
-    - item.item != ".ssh"
+    - item.stat.islnk
+  become: false
 
-# ------------------------------------------
-# Symlink dotfiles
-# ------------------------------------------
-- name: Symlink dotfiles into home directory
-  ansible.builtin.file:
-    src: "{{ dotfiles_repo_local_destination }}/{{ item }}"
-    dest: "{{ dotfiles_home }}/{{ item }}"
-    state: link
+- name: Find files in dotfile entries
+  ansible.builtin.find:
+    paths: "{{ dotfiles_repo_local_destination }}/{{ item }}"
+    file_type: file
+    recurse: true
+    hidden: true
+  register: dotfiles_found
   loop: "{{ dotfiles_files }}"
   loop_control:
     label: "{{ item }}"
-  become: false
 
-# ------------------------------------------
-# Scripts in ~/.local/bin/
-# ------------------------------------------
-- name: Ensure ~/.local/bin exists
+- name: Ensure target directories exist
   ansible.builtin.file:
-    path: "{{ dotfiles_home }}/.local/bin"
+    path: "{{ (dotfiles_home ~ '/' ~ item.0.item ~ '/' ~ (item.1.path | relpath(dotfiles_repo_local_destination ~ '/' ~ item.0.item))) | dirname }}"
     state: directory
     mode: "0755"
-  become: false
-  when: dotfiles_bin_dir | length > 0
-
-- name: Find scripts in bin directory
-  ansible.builtin.find:
-    paths: "{{ dotfiles_repo_local_destination }}/{{ dotfiles_bin_dir }}"
-    file_type: file
-  register: dotfiles_bin_files
-  when: dotfiles_bin_dir | length > 0
-
-- name: Symlink scripts to ~/.local/bin
-  ansible.builtin.file:
-    src: "{{ item.path }}"
-    dest: "{{ dotfiles_home }}/.local/bin/{{ item.path | basename }}"
-    state: link
-  loop: "{{ dotfiles_bin_files.files | default([]) }}"
+  loop: "{{ dotfiles_found.results | subelements('files') }}"
   loop_control:
-    label: "{{ item.path | basename }}"
+    label: "{{ item.0.item }}/{{ item.1.path | basename }}"
+  become: false
+
+- name: Symlink dotfiles into home directory
+  ansible.builtin.file:
+    src: "{{ item.1.path }}"
+    dest: "{{ dotfiles_home }}/{{ item.0.item }}/{{ item.1.path | relpath(dotfiles_repo_local_destination ~ '/' ~ item.0.item) }}"
+    state: link
+    force: true
+  loop: "{{ dotfiles_found.results | subelements('files') }}"
+  loop_control:
+    label: "{{ item.0.item }}/{{ item.1.path | basename }}"
+  become: false
